@@ -20,3 +20,9 @@ isDone的完整传递过程
 
 
 
+难点2：
+export default有什么
+method是组件中可以使用的方法
+data是数据仓库：定义组件的响应式数据的状态
+
+
