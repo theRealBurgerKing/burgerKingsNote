@@ -28,3 +28,6 @@ data是数据仓库：定义组件的响应式数据的状态
 
 由于读写实际的 DOM 节点通常比虚拟节点开销更大，虚拟 DOM 可以带来更好的性能。然而，这也意味着在使用框架时，你往往不应该直接通过原生浏览器 API（如 [`Document.getElementById`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/getElementById)）来编辑你的 HTML 元素，因为这会导致 VDOM 和真实 DOM 不同步。
 
+
+
+Layout组件有一个<slot/>插槽，将外面的内容放进插槽中
