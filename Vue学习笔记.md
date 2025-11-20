@@ -31,3 +31,11 @@ data是数据仓库：定义组件的响应式数据的状态
 
 
 Layout组件有一个<slot/>插槽，将外面的内容放进插槽中
+
+
+
+Vscode快捷键
+
+自动格式化代码 (Auto Code Format)：alt + shift + f
+
+切换自动换行 (Code Wrap)： alt+z
