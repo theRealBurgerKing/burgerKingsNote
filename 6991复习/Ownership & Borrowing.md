@@ -985,30 +985,6 @@ static NUM: i32 = 42;            // 静态变量
 const PI: f64 = 3.14;            // 常量
 ```
 
-## 实际使用场景
-
-### 正确做法：参数化生命周期
-
-rust
-
-```rust
-fn create_list(data: i32) -> Box<LinkedList> {
-    Box::new(LinkedList {
-        data,
-        next: None,
-    })  // 返回 Box，调用者拥有所有权
-}
-```
-
-### 或者返回具有适当生命周期的引用
-
-rust
-
-```rust
-fn get_first<'a>(list: &'a LinkedList) -> &'a i32 {
-    &list.data
-}
-```
 
 ## 总结
 
