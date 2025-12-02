@@ -567,76 +567,11 @@ fn longest<'a>(x: &'a String, y: &'a String) -> &'a String {
 
 ---
 
-## 生命周期约束语法
 
-### `'a: 'b` 的含义
 
-rust
 
-```rust
-where 'a: 'b
-```
 
-**表示：** `'a` 至少和 `'b` 一样长（`'a` 比 `'b` 活得久或一样久）
 
-**示例：**
 
-rust
 
-```rust
-fn example<'a, 'b>(x: &'a str, y: &'b str)
-where
-    'a: 'b,  // 'a 比 'b 长
-{
-    // 可以将 &'a str 赋值给需要 &'b str 的地方
-}
-```
 
----
-
-## 实际运行示例
-
-rust
-
-```rust
-fn main() {
-    caller();
-}
-
-fn caller() {
-    let string1 = String::from("short string");
-    let string1b = &string1;
-    {
-        let string3;
-        {
-            {
-                let string2 = String::from("very very very long string");
-                let string2b = &string2;
-                string3 = longest(string1b, string2b);
-                println!("{string3}");  // 输出：very very very long string
-            }  // string2 释放
-            // println!("{string3}");  // ❌ 如果取消注释会编译错误
-        }
-    }
-    println!("{string1b}");  // 输出：short string
-}
-```
-
----
-
-## 总结
-
-**这个文件展示的要点：**
-
-1. **多种标注方式**：
-    - 复杂标注（多个生命周期参数 + where 子句）
-    - 简化标注（共享一个生命周期参数）
-2. **独立生命周期**：
-    - 返回值可以只依赖部分参数
-3. **嵌套引用**：
-    - `&'a &'b T` 需要 `'b: 'a`
-4. **作用域与生命周期**：
-    - 变量作用域 ≠ 引用有效期
-    - 引用有效期受被引用数据限制
-
-**核心原则：生命周期标注让编译器验证引用的安全性，确保不会出现悬垂引用！**
