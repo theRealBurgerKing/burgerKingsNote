@@ -187,3 +187,53 @@ X∗=arg⁡max⁡XIG(Y,X)X^* = \arg\max_{X} IG(Y, X)X∗=argXmax​IG(Y,X)
 语言模型在自回归生成时，每一步都以已生成的序列作为上下文。一旦某个 token 或短语被生成，它就进入了上下文，而模型在训练中学到的统计规律会让它倾向于**继续生成与上下文相似的内容**——这是一个正反馈循环，一旦陷入就很难自行跳出。
 
 极端情况下会出现"the the the the..."或"然后我就去了，然后我就去了，然后我就去了……"这样的退化输出（degenerate output）。
+### 一、为什么会复读？
+
+根本原因在于**自回归生成的条件依赖结构**。模型在训练语料中见过大量"高频词接高频词"的模式，加之贪心解码把每步都锁死在概率最高的 token，一旦某个词或短语出现，它就成为上下文，而模型的统计偏好会进一步强化同样的词——形成正反馈环路。
+
+Holtzman et al.（2020）的论文把这种现象称为 **Neural Text Degeneration**，并定量证明了贪心解码和 Beam Search 在长序列上必然退化。
+
+### 二、推理阶段：即插即用的方案
+
+**Repetition Penalty（重复惩罚）**
+
+最直接的工程手段。对已出现过的 token，在 logit 阶段直接做惩罚：
+
+```
+logit[t] = logit[t] / penalty    (若 logit > 0)
+logit[t] = logit[t] × penalty    (若 logit < 0)
+```
+
+`penalty > 1` 就是惩罚，典型值 1.1～1.3。HuggingFace 的 `repetition_penalty` 参数直接控制这个。缺点是过大的惩罚会让模型回避正常需要重复的词（比如名字、专有名词）。
+
+**Frequency Penalty 和 Presence Penalty**
+
+OpenAI API 的两个参数，语义更精细：Presence Penalty 是"只要出现过就扣一次分"（鼓励话题多样），Frequency Penalty 是"出现越多扣越多"（抑制词汇层面的重复）。两者可以叠加使用。
+
+**n-gram 阻断（no_repeat_ngram_size）**
+
+硬规则：如果某个 n-gram 在历史中已经出现过，就把它的概率强制设为 0。HuggingFace `generate()` 里 `no_repeat_ngram_size=3` 就能开启。效果强但粗暴——翻译场景中同一实体名可能需要合法重复，这种方法会误杀。
+
+**Temperature + Top-P**
+
+上一问讲过，但和复读机的关系在于：贪心解码（τ→0）是复读机的温床，适度提高温度 + 用 Top-P 截断尾部，就能在每一步自然引入随机性，打破局部吸引子。
+
+---
+
+### 三、训练阶段：从根源修复
+
+**Unlikelihood Training**（Welleck et al., 2020）
+
+在损失函数里显式加入一项"不喜欢度"：除了最大化正确 token 的对数概率，还要最小化历史上已出现 token 的概率。损失变成：
+
+L=LMLE+α∑t∑c∈Ct−log⁡(1−pθ(c∣x<t))\mathcal{L} = \mathcal{L}_{\text{MLE}} + \alpha \sum_{t} \sum_{c \in C_t} -\log(1 - p_\theta(c \mid x_{<t}))L=LMLE​+αt∑​c∈Ct​∑​−log(1−pθ​(c∣x<t​))
+
+其中 CtC_t Ct​ 是候选"不喜欢"集合（通常是历史上下文中的词）。这从模型分布层面让重复 token 的概率系统性地低于正常水平。
+
+**RLHF / RLAIF**
+
+在对齐阶段，人类标注员（或 AI 裁判）对重复、啰嗦的输出给低分，奖励模型的梯度会自动将重复惩罚内化到参数中。这是目前生产级大模型（GPT-4、Claude 等）抑制复读机最主要的手段之一。
+
+
+
+Logit 是语言模型输出层的**原始打分值**，softmax 之前的那个实数。
