@@ -5,9 +5,30 @@
 目标输入 → LLM推理reasoning → 调用工具acting → 获取结果observe → 再次推理 → ... → 输出最终答案
 ```
 
-# agnet核心组件
+# Agent核心组件
 
+LLM大模型 核心大脑
+循环ReAct
 
+规划器 任务拆解
+常见规划方式 Cot tot react plan and execute
+
+记忆 信息存储
+**① 短期记忆（In-context）**：当前对话窗口内的所有内容，LLM 直接"看到"，最即时但有长度限制。  
+  
+**② 长期记忆（External）**：存储在向量数据库（如 Pinecone、Chroma）中，通过语义搜索按需检索，不受 context 长度限制。  
+  
+**③ 情节记忆（Episodic）**：历史对话摘要、任务执行记录，帮助 Agent 记住"上次做过什么"。  
+  
+**④ 语义记忆（Semantic）**：知识库、FAQ、文档，结构化的领域知识。
+
+工具 能力拓展
+web搜索 代码执行器 外部api 图像生成
+
+执行器
+接受行动指令，调用工具，将执行结果返回给llm，形成闭环
+
+外部世界
 
 
 
