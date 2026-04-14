@@ -5,6 +5,12 @@
 目标输入 → LLM推理reasoning → 调用工具acting → 获取结果observe → 再次推理 → ... → 输出最终答案
 ```
 
+# agnet核心组件
+
+
+
+
+
 
 ## 讲讲你知道的框架，cot tot react等
 ### 1. CoT（Chain of Thought）—— 思维链
